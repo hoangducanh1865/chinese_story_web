@@ -53,3 +53,13 @@ next-env.d.ts
 .vscode/
 venv/
 model/venv/
+
+# Vercel deployment
+.vercel
+.next/
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
