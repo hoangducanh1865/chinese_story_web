@@ -27,6 +27,8 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+.env.production
+.env.development
 
 # Python virtual environments
 model/venv/
@@ -49,17 +51,5 @@ __pycache__/
 *.tsbuildinfo
 next-env.d.ts
 
-.DS_Store
+# IDE
 .vscode/
-venv/
-model/venv/
-
-# Vercel deployment
-.vercel
-.next/
-
-# Environment variables
-.env
-.env.local
-.env.production
-.env.development
