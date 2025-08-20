@@ -1015,19 +1015,6 @@ export default function Home() {
                 </div>
             )}
 
-            {/* Reading Mode Instructions */}
-            {readingMode === 'sentence' && (
-                <div style={{ 
-                    marginTop: "15px", 
-                    padding: "12px", 
-                    backgroundColor: "#e7f3ff", 
-                    border: "1px solid #b3d9ff",
-                    borderRadius: "5px",
-                    fontSize: "14px"
-                }}>
-                </div>
-            )}
-
             {/* Story Info */}
             {storyInfo && (
                 <div style={{ 
