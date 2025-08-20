@@ -898,7 +898,7 @@ export default function Home() {
                         </span>
                     )}
                 </div>
-                {story || "Click 'Generate Story' to create a new Chinese story!"}
+                {story || "Click 'Generate story' to create a new Chinese story!"}
             </div>
 
             {/* Translation Display */}

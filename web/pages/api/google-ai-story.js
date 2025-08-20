@@ -67,9 +67,12 @@ export default async function handler(req, res) {
         
         // Create prompt for Chinese story generation with Vietnamese translation
         const randomTopics = [
-            "学校生活", "家庭聚会", "购物经历", "公园游玩", "朋友聚会", 
-            "做饭经历", "旅行故事", "宠物生活", "运动活动", "读书经历",
-            "工作日常", "节日庆祝", "天气变化", "交通出行", "健康生活"
+            // healing / motivation
+            "心灵治愈", "自我成长", "积极生活", "努力学习", "克服困难", "友情和支持", "梦想与希望", 
+            // technology / CS / AI
+            "人工智能", "计算机科学", "未来科技", "程序设计", "机器人", "互联网生活", "大数据", "虚拟现实", "手机应用",
+            // keep some simple HSK daily-life topics (for balance)
+            "学校生活", "家庭聚会", "健康生活", "读书经历", "旅行故事"
         ];
         
         const randomCharacters = [
@@ -92,7 +95,8 @@ export default async function handler(req, res) {
 
 故事内容要求：
 - 讲述一个完整的故事，有开头、发展、高潮和结尾
-- 包含日常生活场景（如：上学、购物、吃饭、家庭活动、朋友交往等）
+- 主题必须与"心灵治愈、自我成长、积极生活、人工智能、计算机科学、未来科技"等相关
+- 情节可以结合日常生活场景，也可以包含学习、研究、科技探索或心理成长的经历
 - 情节要有趣且富有教育意义
 - 适合中文学习者阅读和理解
 - 语言自然流畅，句子结构不要太复杂
