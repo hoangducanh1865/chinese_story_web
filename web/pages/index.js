@@ -445,7 +445,7 @@ export default function Home() {
         speechSynthesis.speak(utterance);
     }
 
-    // Function to speak vocabulary: Vietnamese meaning → Chinese word (2 times)
+    // Function to speak vocabulary: Chinese word (2 times)
     function speakVocabulary(vocabItem) {
         if (!('speechSynthesis' in window)) {
             alert("Speech synthesis not supported in this browser.");
@@ -455,55 +455,36 @@ export default function Home() {
         speechSynthesis.cancel();
 
         const speakSequence = async () => {
-            // First speak Vietnamese meaning
-            const vietnameseUtterance = new SpeechSynthesisUtterance(vocabItem.vietnamese);
-            if (selectedVietnameseVoice) {
-                vietnameseUtterance.voice = selectedVietnameseVoice;
-                vietnameseUtterance.lang = selectedVietnameseVoice.lang;
+            // First Chinese pronunciation
+            const chineseUtterance1 = new SpeechSynthesisUtterance(vocabItem.chinese);
+            if (selectedChineseVoice) {
+                chineseUtterance1.voice = selectedChineseVoice;
+                chineseUtterance1.lang = selectedChineseVoice.lang;
             } else {
-                vietnameseUtterance.lang = 'vi-VN';
+                chineseUtterance1.lang = 'zh-CN';
             }
-            vietnameseUtterance.rate = vietnameseSpeechRate;
-            vietnameseUtterance.pitch = 1.1;
-            vietnameseUtterance.volume = 0.9;
+            chineseUtterance1.rate = chineseSpeechRate * 0.9; // slightly slower for clarity
+            chineseUtterance1.pitch = 1.0;
+            chineseUtterance1.volume = 0.9;
 
-            speechSynthesis.speak(vietnameseUtterance);
+            speechSynthesis.speak(chineseUtterance1);
 
-            // Wait for Vietnamese to finish, then speak Chinese twice
-            vietnameseUtterance.onend = () => {
+            // After the first Chinese pronunciation ends, speak it again
+            chineseUtterance1.onend = () => {
                 setTimeout(() => {
-                    // First Chinese pronunciation
-                    const chineseUtterance1 = new SpeechSynthesisUtterance(vocabItem.chinese);
+                    const chineseUtterance2 = new SpeechSynthesisUtterance(vocabItem.chinese);
                     if (selectedChineseVoice) {
-                        chineseUtterance1.voice = selectedChineseVoice;
-                        chineseUtterance1.lang = selectedChineseVoice.lang;
+                        chineseUtterance2.voice = selectedChineseVoice;
+                        chineseUtterance2.lang = selectedChineseVoice.lang;
                     } else {
-                        chineseUtterance1.lang = 'zh-CN';
+                        chineseUtterance2.lang = 'zh-CN';
                     }
-                    chineseUtterance1.rate = chineseSpeechRate * 0.9; // Slightly slower for clarity
-                    chineseUtterance1.pitch = 1.0;
-                    chineseUtterance1.volume = 0.9;
+                    chineseUtterance2.rate = chineseSpeechRate * 0.9;
+                    chineseUtterance2.pitch = 1.0;
+                    chineseUtterance2.volume = 0.9;
 
-                    speechSynthesis.speak(chineseUtterance1);
-
-                    // Second Chinese pronunciation
-                    chineseUtterance1.onend = () => {
-                        setTimeout(() => {
-                            const chineseUtterance2 = new SpeechSynthesisUtterance(vocabItem.chinese);
-                            if (selectedChineseVoice) {
-                                chineseUtterance2.voice = selectedChineseVoice;
-                                chineseUtterance2.lang = selectedChineseVoice.lang;
-                            } else {
-                                chineseUtterance2.lang = 'zh-CN';
-                            }
-                            chineseUtterance2.rate = chineseSpeechRate * 0.9;
-                            chineseUtterance2.pitch = 1.0;
-                            chineseUtterance2.volume = 0.9;
-
-                            speechSynthesis.speak(chineseUtterance2);
-                        }, 500); // 0.5 second pause between repetitions
-                    };
-                }, 800); // 0.8 second pause between Vietnamese and Chinese
+                    speechSynthesis.speak(chineseUtterance2);
+                }, 500); // pause 0.5s between repetitions
             };
         };
 
@@ -619,9 +600,9 @@ export default function Home() {
                     </label>
                     <input 
                         type="range" 
-                        min="0.3" 
-                        max="2.5" 
-                        step="0.1" 
+                        min="0.25" 
+                        max="2.0" 
+                        step="0.25" 
                         value={chineseSpeechRate}
                         onChange={(e) => setChineseSpeechRate(parseFloat(e.target.value))}
                         style={{ width: "100%", maxWidth: "300px" }}
@@ -630,7 +611,7 @@ export default function Home() {
                     {/* Chinese Speech Rate Presets */}
                     <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "15px" }}>
                         {[
-                            { label: "Slow", value: 0.6 },
+                            { label: "Slow", value: 0.5},
                             { label: "Normal", value: 1.0 },
                             { label: "Fast", value: 1.5 },
                             { label: "Very Fast", value: 2.0 }
@@ -660,9 +641,9 @@ export default function Home() {
                     </label>
                     <input 
                         type="range" 
-                        min="0.3" 
-                        max="2.5" 
-                        step="0.1" 
+                        min="0.25" 
+                        max="2.0" 
+                        step="0.25" 
                         value={vietnameseSpeechRate}
                         onChange={(e) => setVietnameseSpeechRate(parseFloat(e.target.value))}
                         style={{ width: "100%", maxWidth: "300px" }}
@@ -671,7 +652,7 @@ export default function Home() {
                     {/* Vietnamese Speech Rate Presets */}
                     <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
                         {[
-                            { label: "Slow", value: 0.6 },
+                            { label: "Slow", value: 0.5 },
                             { label: "Normal", value: 1.0 },
                             { label: "Fast", value: 1.5 },
                             { label: "Very Fast", value: 2.0 }
