@@ -522,7 +522,7 @@ export default function Home() {
                 border: "1px solid #dee2e6",
                 borderRadius: "5px"
             }}>
-                <h3 style={{ marginTop: 0 }}>Choose Generation Method:</h3>
+                <h3 style={{ marginTop: 0 }}>Choose generation method:</h3>
                 <div style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}>
                     <label style={{ 
                         display: "flex", 
@@ -541,10 +541,7 @@ export default function Home() {
                             onChange={(e) => setGenerationMethod(e.target.value)}
                             style={{ marginRight: "8px" }}
                         />
-                        🤖 Custom GAN Model
-                        <div style={{ fontSize: "12px", marginLeft: "5px" }}>
-                            (Local AI Model)
-                        </div>
+                        🤖 GAN
                     </label>
                     
                     <label style={{ 
@@ -564,10 +561,7 @@ export default function Home() {
                             onChange={(e) => setGenerationMethod(e.target.value)}
                             style={{ marginRight: "8px" }}
                         />
-                        🌟 Google AI Studio
-                        <div style={{ fontSize: "12px", marginLeft: "5px" }}>
-                            (Gemini Pro)
-                        </div>
+                        🌟 Gemini
                     </label>
                 </div>
             </div>
@@ -581,9 +575,9 @@ export default function Home() {
                     border: `1px solid ${modelStatus?.model_available ? "#c3e6cb" : "#f5c6cb"}`,
                     borderRadius: "5px"
                 }}>
-                    <strong>GAN Model Status:</strong> {
+                    <strong>GAN status:</strong> {
                         modelStatus === null ? "Checking..." :
-                        modelStatus.model_available ? "✅ GAN Model Available" : "❌ Using Fallback Stories"
+                        modelStatus.model_available ? "✅ Using GAN" : "❌ BUG"
                     }
                     {modelStatus?.error && <div style={{ fontSize: "12px", color: "#721c24" }}>Error: {modelStatus.error}</div>}
                 </div>
@@ -598,10 +592,7 @@ export default function Home() {
                     border: "1px solid #bee5eb",
                     borderRadius: "5px"
                 }}>
-                    <strong>Google AI Studio:</strong> ✅ Using Gemini Pro Model
-                    <div style={{ fontSize: "12px", color: "#0c5460" }}>
-                        High-quality AI-generated Chinese stories
-                    </div>
+                    <strong>Gemini status:</strong> ✅ Using Gemini
                 </div>
             )}
 
@@ -609,7 +600,7 @@ export default function Home() {
             <div style={{ marginBottom: "20px" }}>
                 <div style={{ marginBottom: "15px" }}>
                     <label style={{ display: "block", marginBottom: "5px" }}>
-                        <strong>Temperature (Creativity):</strong> {temperature}
+                        <strong>Creativity:</strong> {temperature}
                     </label>
                     <input 
                         type="range" 
@@ -620,14 +611,11 @@ export default function Home() {
                         onChange={(e) => setTemperature(parseFloat(e.target.value))}
                         style={{ width: "100%", maxWidth: "300px" }}
                     />
-                    <div style={{ fontSize: "12px", color: "#666", marginTop: "2px" }}>
-                        Lower = More predictable, Higher = More creative
-                    </div>
                 </div>
 
                 <div style={{ marginBottom: "15px" }}>
                     <label style={{ display: "block", marginBottom: "5px" }}>
-                        <strong>🇨🇳 Chinese Speech Rate:</strong> {chineseSpeechRate}x
+                        <strong>🇨🇳 Speed:</strong> {chineseSpeechRate}x
                     </label>
                     <input 
                         type="range" 
@@ -638,9 +626,6 @@ export default function Home() {
                         onChange={(e) => setChineseSpeechRate(parseFloat(e.target.value))}
                         style={{ width: "100%", maxWidth: "300px" }}
                     />
-                    <div style={{ fontSize: "12px", color: "#666", marginTop: "2px", marginBottom: "8px" }}>
-                        0.3x = Very slow, 1.0x = Normal, 2.5x = Very fast
-                    </div>
                     
                     {/* Chinese Speech Rate Presets */}
                     <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "15px" }}>
@@ -663,7 +648,7 @@ export default function Home() {
                                     cursor: "pointer"
                                 }}
                             >
-                                {preset.label} ({preset.value}x)
+                                {preset.value}x
                             </button>
                         ))}
                     </div>
@@ -671,7 +656,7 @@ export default function Home() {
 
                 <div style={{ marginBottom: "15px" }}>
                     <label style={{ display: "block", marginBottom: "5px" }}>
-                        <strong>🇻🇳 Vietnamese Speech Rate:</strong> {vietnameseSpeechRate}x
+                        <strong>🇻🇳 Speed:</strong> {vietnameseSpeechRate}x
                     </label>
                     <input 
                         type="range" 
@@ -682,9 +667,6 @@ export default function Home() {
                         onChange={(e) => setVietnameseSpeechRate(parseFloat(e.target.value))}
                         style={{ width: "100%", maxWidth: "300px" }}
                     />
-                    <div style={{ fontSize: "12px", color: "#666", marginTop: "2px", marginBottom: "8px" }}>
-                        0.3x = Very slow, 1.0x = Normal, 2.5x = Very fast
-                    </div>
                     
                     {/* Vietnamese Speech Rate Presets */}
                     <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
@@ -707,7 +689,7 @@ export default function Home() {
                                     cursor: "pointer"
                                 }}
                             >
-                                {preset.label} ({preset.value}x)
+                                {preset.value}x
                             </button>
                         ))}
                     </div>
@@ -736,7 +718,7 @@ export default function Home() {
                                 onChange={(e) => setReadingMode(e.target.value)}
                                 style={{ marginRight: "6px" }}
                             />
-                            🎵 Normal Reading
+                            Normal Reading
                         </label>
                         
                         <label style={{ 
@@ -757,19 +739,13 @@ export default function Home() {
                                 onChange={(e) => setReadingMode(e.target.value)}
                                 style={{ marginRight: "6px" }}
                             />
-                            📚 Sentence Learning Mode
+                            Sentence Reading
                         </label>
-                    </div>
-                    <div style={{ fontSize: "11px", color: "#666", marginTop: "4px" }}>
-                        {readingMode === 'normal' ? 
-                            "Reads the entire story in Chinese" : 
-                            "Reads sentence by sentence: Vietnamese → Chinese → Chinese (repeat for memory)"
-                        }
                     </div>
                     
                     {/* Voice Information */}
                     <div style={{ fontSize: "10px", color: "#555", marginTop: "8px", padding: "6px", backgroundColor: "#f1f3f4", borderRadius: "3px" }}>
-                        <div><strong>🎯 Voice Quality:</strong></div>
+                        <div><strong>Voice Quality:</strong></div>
                         <div>🇨🇳 Chinese: {selectedChineseVoice ? `${selectedChineseVoice.name} (${selectedChineseVoice.lang})` : 'Default system voice'}</div>
                         <div>🇻🇳 Vietnamese: {selectedVietnameseVoice ? `${selectedVietnameseVoice.name} (${selectedVietnameseVoice.lang})` : 'Default system voice'}</div>
                         <div style={{ marginTop: "2px", fontStyle: "italic" }}>
@@ -858,7 +834,7 @@ export default function Home() {
                             fontSize: "14px"
                         }}
                     >
-                        {isSpeaking ? "🔊 Speaking..." : "🔊 Read Aloud"}
+                        {isSpeaking ? "🔊" : "🔊"}
                         {currentSentenceIndex >= 0 && ` (${currentSentenceIndex + 1})`}
                     </button>
 
@@ -875,7 +851,7 @@ export default function Home() {
                                 fontSize: "14px"
                             }}
                         >
-                            🛑 Stop Reading
+                            🛑
                         </button>
                     )}
 
@@ -964,7 +940,7 @@ export default function Home() {
                     borderRadius: "5px"
                 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
-                        <h3 style={{ margin: 0, color: "#28a745" }}>📚 Vocabulary Analysis</h3>
+                        <h3 style={{ margin: 0, color: "#28a745" }}>📚 Vocabulary</h3>
                         <button
                             onClick={() => setShowVocabulary(!showVocabulary)}
                             style={{
@@ -1030,7 +1006,7 @@ export default function Home() {
                                             fontSize: "12px"
                                         }}
                                     >
-                                        🔊 Practice (VN → CN x2)
+                                        🔊
                                     </button>
                                 </div>
                             ))}
@@ -1049,13 +1025,7 @@ export default function Home() {
                     borderRadius: "5px",
                     fontSize: "14px"
                 }}>
-                    <strong>📚 Sentence Learning Mode Instructions:</strong>
-                    <ul style={{ margin: "8px 0 0 0", paddingLeft: "20px" }}>
-                        <li>First, translate the story to Vietnamese</li>
-                        <li>Each sentence will be read in this pattern:</li>
-                        <li style={{ marginLeft: "20px" }}>1️⃣ Vietnamese (meaning) → 2️⃣ Chinese (1st time) → 3️⃣ Chinese (2nd time for memory)</li>
-                        <li>Perfect for language learning and memorization!</li>
-                    </ul>
+                    <strong>📚 Sentence Learning Mode</strong>
                 </div>
             )}
 
@@ -1080,7 +1050,7 @@ export default function Home() {
                     Chinese Rate: {chineseSpeechRate}x | Vietnamese Rate: {vietnameseSpeechRate}x | 
                     Mode: {readingMode === 'sentence' ? 'Sentence Learning (VN→CN→CN)' : 'Normal (CN only)'} | 
                     Language: Chinese (zh-CN) + Vietnamese (vi-VN) | 
-                    Status: {isSpeaking ? "🔊 Speaking" : "⏸️ Ready"}
+                    Status: {isSpeaking ? "🔊" : "⏸️"}
                     <br />
                     <strong>Translation:</strong> 
                     {translation ? "✅ Available" : "❌ Not translated"} | 
