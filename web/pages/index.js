@@ -718,7 +718,7 @@ export default function Home() {
                                 onChange={(e) => setReadingMode(e.target.value)}
                                 style={{ marginRight: "6px" }}
                             />
-                            Normal Reading
+                            Normal reading
                         </label>
                         
                         <label style={{ 
@@ -739,13 +739,13 @@ export default function Home() {
                                 onChange={(e) => setReadingMode(e.target.value)}
                                 style={{ marginRight: "6px" }}
                             />
-                            Sentence Reading
+                            Sentence reading
                         </label>
                     </div>
                     
                     {/* Voice Information */}
                     <div style={{ fontSize: "10px", color: "#555", marginTop: "8px", padding: "6px", backgroundColor: "#f1f3f4", borderRadius: "3px" }}>
-                        <div><strong>Voice Quality:</strong></div>
+                        <div><strong>Voice quality:</strong></div>
                         <div>🇨🇳 Chinese: {selectedChineseVoice ? `${selectedChineseVoice.name} (${selectedChineseVoice.lang})` : 'Default system voice'}</div>
                         <div>🇻🇳 Vietnamese: {selectedVietnameseVoice ? `${selectedVietnameseVoice.name} (${selectedVietnameseVoice.lang})` : 'Default system voice'}</div>
                         <div style={{ marginTop: "2px", fontStyle: "italic" }}>
@@ -799,7 +799,7 @@ export default function Home() {
                             fontWeight: "bold"
                         }}
                     >
-                        {loading ? "Generating..." : `Generate Story (${generationMethod === 'google-ai' ? 'Google AI' : 'GAN Model'})`}
+                        {loading ? "Generating..." : `Generate story`}
                     </button>
 
                     {/* Only show translate button for GAN stories */}
@@ -868,7 +868,7 @@ export default function Home() {
                             fontSize: "12px"
                         }}
                     >
-                        Refresh GAN Status
+                        Refresh GAN status
                     </button>
                 </div>
             </div>
@@ -884,7 +884,7 @@ export default function Home() {
                 borderRadius: "5px"
             }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                    <h3 style={{ margin: 0, color: "#333" }}>🇨🇳 Chinese Story</h3>
+                    <h3 style={{ margin: 0, color: "#333" }}>🇨🇳 Chinese story</h3>
                     {currentSentenceIndex >= 0 && (
                         <span style={{ 
                             fontSize: "14px", 
@@ -913,7 +913,7 @@ export default function Home() {
                     borderRadius: "5px"
                 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                        <h3 style={{ margin: 0, color: "#6f42c1" }}>🇻🇳 Vietnamese Translation</h3>
+                        <h3 style={{ margin: 0, color: "#6f42c1" }}>🇻🇳 Vietnamese translation</h3>
                         {translation.includes('[Dịch đơn giản]') && (
                             <span style={{
                                 fontSize: "12px",
@@ -1025,7 +1025,6 @@ export default function Home() {
                     borderRadius: "5px",
                     fontSize: "14px"
                 }}>
-                    <strong>📚 Sentence Learning Mode</strong>
                 </div>
             )}
 
