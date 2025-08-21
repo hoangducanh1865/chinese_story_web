@@ -16,16 +16,16 @@ function parseVocabularyAnalysis(vocabText) {
             let match;
             
             // Pattern: 中文 (pinyin) - Vietnamese
-            match = trimmedLine.match(/^[\d\.\-\*\s]*([^\(\)]+?)\s*\(([^)]+)\)\s*[-–--]\s*(.+)$/);
+            match = trimmedLine.match(/^[\d\.\-\*\s]*([^\(\)]+?)\s*\(([^)]+)\)\s*[-—]\s*(.+)$/);
             
             if (!match) {
                 // Pattern: 中文(pinyin) - Vietnamese
-                match = trimmedLine.match(/^[\d\.\-\*\s]*([^\(\)]+?)\(([^)]+)\)\s*[-–--]\s*(.+)$/);
+                match = trimmedLine.match(/^[\d\.\-\*\s]*([^\(\)]+?)\(([^)]+)\)\s*[-—]\s*(.+)$/);
             }
             
             if (!match) {
                 // Pattern: 中文 - Vietnamese (pinyin)
-                match = trimmedLine.match(/^[\d\.\-\*\s]*([^\-–--]+?)\s*[-–--]\s*([^(]+?)\s*\(([^)]+)\)$/);
+                match = trimmedLine.match(/^[\d\.\-\*\s]*([^\-—]+?)\s*[-—]\s*([^(]+?)\s*\(([^)]+)\)$/);
                 if (match) {
                     // Reorder to maintain consistency
                     match = [match[0], match[1], match[3], match[2]];
