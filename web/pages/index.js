@@ -490,130 +490,6 @@ export default function Home() {
 
         speakSequence();
     }
-    
-    // Function to split story into sentences with numbers and pinyin
-function parseFormattedStory(storyText) {
-  if (!storyText) return [];
-  
-  const lines = storyText.split('\n');
-  const sentences = [];
-  let currentSentence = null;
-  
-  for (const line of lines) {
-    const lineTrimmed = line.trim();
-    
-    // Check if this is a numbered sentence line (e.g., "1. 你喜欢我吗？")
-    const sentenceMatch = lineTrimmed.match(/^(\d+)\.\s*(.+)$/);
-    
-    if (sentenceMatch) {
-      // If we already have a sentence, push it to the array
-      if (currentSentence) {
-        sentences.push(currentSentence);
-      }
-      
-      currentSentence = {
-        number: parseInt(sentenceMatch[1]),
-        chinese: sentenceMatch[2],
-        pinyin: ''
-      };
-    } 
-    // Check if this is a pinyin line (indented line with pinyin)
-    else if (currentSentence && !currentSentence.pinyin && lineTrimmed && /^[a-zA-Z\sāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(lineTrimmed)) {
-      currentSentence.pinyin = lineTrimmed;
-    }
-  }
-  
-  // Push the last sentence
-  if (currentSentence) {
-    sentences.push(currentSentence);
-  }
-  
-  return sentences;
-}
-
-// Function to extract only Chinese text for speech (without numbers and pinyin)
-function extractChineseTextForSpeech(storyText) {
-  const sentences = parseFormattedStory(storyText);
-  return sentences.map(s => s.chinese).join('。') + '。';
-}
-
-// Update the speakNormal function to use only Chinese text
-function speakNormal() {
-    const chineseText = extractChineseTextForSpeech(story);
-    const utterance = new SpeechSynthesisUtterance(chineseText);
-    
-    // Use the best available Chinese voice
-    if (selectedChineseVoice) {
-        utterance.voice = selectedChineseVoice;
-        utterance.lang = selectedChineseVoice.lang;
-    } else {
-        utterance.lang = "zh-CN";
-    }
-    
-    // Optimized speech parameters for better quality
-    utterance.rate = Math.max(0.3, Math.min(2.0, chineseSpeechRate)); // Clamp rate
-    utterance.pitch = 1.0; // Neutral pitch for clarity
-    utterance.volume = 0.9; // Slightly lower volume to prevent distortion
-    
-    utterance.onstart = () => {
-        setIsSpeaking(true);
-        console.log('Started speaking with voice:', utterance.voice?.name || 'default');
-    };
-    
-    utterance.onend = () => {
-        setIsSpeaking(false);
-        console.log('Finished speaking');
-    };
-    
-    utterance.onerror = (event) => {
-        setIsSpeaking(false);
-        console.error('Speech synthesis error:', event.error);
-        
-        // Retry with default voice if custom voice fails
-        if (utterance.voice && event.error === 'voice-unavailable') {
-            console.log('Retrying with default voice...');
-            const retryUtterance = new SpeechSynthesisUtterance(chineseText);
-            retryUtterance.lang = "zh-CN";
-            retryUtterance.rate = chineseSpeechRate;
-            retryUtterance.pitch = 1.0;
-            retryUtterance.volume = 0.9;
-            retryUtterance.onstart = () => setIsSpeaking(true);
-            retryUtterance.onend = () => setIsSpeaking(false);
-            retryUtterance.onerror = () => {
-                setIsSpeaking(false);
-                alert("Speech synthesis failed. Please try again or check your browser's speech settings.");
-            };
-            speechSynthesis.speak(retryUtterance);
-        } else {
-            alert("Speech synthesis failed. Please try again or check your browser's speech settings.");
-        }
-    };
-
-    speechSynthesis.speak(utterance);
-}
-
-// Update the speakSentenceBySeentence function
-function speakSentenceBySeentence() {
-    if (!translation) {
-        alert("Please translate the story first for sentence-by-sentence reading!");
-        return;
-    }
-
-    // Parse formatted story
-    const formattedSentences = parseFormattedStory(story);
-    const chineseSentences = formattedSentences.map(s => s.chinese);
-    const vietnameseSentences = translation.split(/[.!?]/).filter(s => s.trim().length > 0);
-    
-    if (chineseSentences.length === 0) {
-        alert("No sentences found in the story!");
-        return;
-    }
-
-    setIsSpeaking(true);
-    setCurrentSentenceIndex(0);
-    speakSentenceSequence(chineseSentences, vietnameseSentences, 0);
-}
-
 
     return (
         <div style={{ padding: "30px", fontFamily: "Arial, sans-serif" }}>
@@ -849,7 +725,7 @@ function speakSentenceBySeentence() {
                     </div>
                     
                     {/* Voice Information */}
-                    <div style={{ fontSize: "10px", color: "#555", marginTop: "8px", padding: "6px", backgroundColor: "#f1f3f4", borderRadius: "3px" }}>
+                <div style={{ fontSize: "10px", color: "#555", marginTop: "8px", padding: "6px", backgroundColor: "#f1f3f4", borderRadius: "3px" }}>
                         <div><strong>Voice quality:</strong></div>
                         <div>🇨🇳 Chinese: {selectedChineseVoice ? `${selectedChineseVoice.name} (${selectedChineseVoice.lang})` : 'Default system voice'}</div>
                         <div>🇻🇳 Vietnamese: {selectedVietnameseVoice ? `${selectedVietnameseVoice.name} (${selectedVietnameseVoice.lang})` : 'Default system voice'}</div>
@@ -979,51 +855,53 @@ function speakSentenceBySeentence() {
             </div>
 
             {/* Story Display */}
-            // Update the story display to show formatted content
-<div style={{ 
-    marginTop: "20px", 
-    padding: "15px", 
-    border: "1px solid #ddd", 
-    backgroundColor: "#fff", 
-    minHeight: "100px", 
-    fontSize: "20px",
-    borderRadius: "5px",
-    whiteSpace: "pre-line" // Preserve line breaks
-}}>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-        <h3 style={{ margin: 0, color: "#333" }}>🇨🇳 Chinese story</h3>
-        {currentSentenceIndex >= 0 && (
-            <span style={{ 
-                fontSize: "14px", 
-                backgroundColor: "#ffc107", 
-                color: "#000", 
-                padding: "4px 8px", 
-                borderRadius: "4px",
-                fontWeight: "bold"
+            <div style={{ 
+                marginTop: "20px", 
+                padding: "15px", 
+                border: "1px solid #ddd", 
+                backgroundColor: "#fff", 
+                minHeight: "100px", 
+                fontSize: "20px",
+                borderRadius: "5px"
             }}>
-                Reading sentence {currentSentenceIndex + 1}
-            </span>
-        )}
-    </div>
-    {story ? (
-        parseFormattedStory(story).map(sentence => (
-            <div key={sentence.number} style={{ marginBottom: "10px" }}>
-                <div style={{ fontWeight: "bold" }}>
-                    {sentence.number}. {sentence.chinese}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                    <h3 style={{ margin: 0, color: "#333" }}>🇨🇳 Chinese story</h3>
+                    {currentSentenceIndex >= 0 && (
+                        <span style={{ 
+                            fontSize: "14px", 
+                            backgroundColor: "#ffc107", 
+                            color: "#000", 
+                            padding: "4px 8px", 
+                            borderRadius: "4px",
+                            fontWeight: "bold"
+                        }}>
+                            Reading sentence {currentSentenceIndex + 1}
+                        </span>
+                    )}
                 </div>
-                <div style={{ 
-                    fontSize: "16px", 
-                    color: "#666", 
-                    fontStyle: "italic",
-                    marginLeft: "20px"
-                }}>
-                    {sentence.pinyin}
-                </div>
+                {story && pinyin ? (
+  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+    {story
+      .split(/[。！？]/)
+      .filter(s => s.trim().length > 0)
+      .map((sentence, index) => {
+        const pinyinSentences = pinyin
+          .split(/[。！？]/)
+          .filter(s => s.trim().length > 0);
+        return (
+          <div key={index}>
+            <div>
+              <strong>{index + 1}.</strong> {sentence}
             </div>
-        ))
-    ) : "Click 'Generate story' to create a new Chinese story!"}
-</div>
- 
+            <div style={{ marginLeft: "24px", fontSize: "16px", color: "#555" }}>
+              {pinyinSentences[index] || ""}
+            </div>
+          </div>
+        );
+      })}
+  </div>
+) : "Click 'Generate story' to create a new Chinese story!"}
+            </div>
 
             {/* Translation Display */}
             {translation && (
@@ -1158,12 +1036,12 @@ function speakSentenceBySeentence() {
                     <br />
                     <strong>Speech Settings:</strong> 
                     Chinese Rate: {chineseSpeechRate}x | Vietnamese Rate: {vietnameseSpeechRate}x | 
-                    Mode: {readingMode === 'sentence' ? 'Sentence Learning (VN→CN→CN)' : 'Normal (CN only)'} | 
+                    Mode: {readingMode === 'sentence' ? 'Sentence Learning' : 'Normal'} | 
                     Language: Chinese (zh-CN) + Vietnamese (vi-VN) | 
                     Status: {isSpeaking ? "🔊" : "⏸️"}
                     <br />
                     <strong>Translation:</strong> 
-                    {translation ? "✅ Available" : "❌ Not translated"} | 
+                    {translation ? "✅ Available" : "❌ Not available"} | 
                     Required for sentence mode: {readingMode === 'sentence' ? "Yes" : "No"}
                 </div>
             )}

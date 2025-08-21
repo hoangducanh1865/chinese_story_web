@@ -16,16 +16,16 @@ function parseVocabularyAnalysis(vocabText) {
             let match;
             
             // Pattern: 中文 (pinyin) - Vietnamese
-            match = trimmedLine.match(/^[\d\.\-\*\s]*([^\(\)]+?)\s*\(([^)]+)\)\s*[-–—]\s*(.+)$/);
+            match = trimmedLine.match(/^[\d\.\-\*\s]*([^\(\)]+?)\s*\(([^)]+)\)\s*[-–--]\s*(.+)$/);
             
             if (!match) {
                 // Pattern: 中文(pinyin) - Vietnamese
-                match = trimmedLine.match(/^[\d\.\-\*\s]*([^\(\)]+?)\(([^)]+)\)\s*[-–—]\s*(.+)$/);
+                match = trimmedLine.match(/^[\d\.\-\*\s]*([^\(\)]+?)\(([^)]+)\)\s*[-–--]\s*(.+)$/);
             }
             
             if (!match) {
                 // Pattern: 中文 - Vietnamese (pinyin)
-                match = trimmedLine.match(/^[\d\.\-\*\s]*([^\-–—]+?)\s*[-–—]\s*([^(]+?)\s*\(([^)]+)\)$/);
+                match = trimmedLine.match(/^[\d\.\-\*\s]*([^\-–--]+?)\s*[-–--]\s*([^(]+?)\s*\(([^)]+)\)$/);
                 if (match) {
                     // Reorder to maintain consistency
                     match = [match[0], match[1], match[3], match[2]];
@@ -106,21 +106,22 @@ export default async function handler(req, res) {
 - 每个句子长度适中（8-15个字）
 - 总字数控制在500-800字之间
 
-输出格式要求：
-- 每个中文句子必须有编号
-- 每个中文句子下面必须有拼音（带声调）
-- 拼音格式：每个音节之间用空格分隔，保留标点符号
+词汇分析要求：
+- 对每个句子分析3-5个重要的学习词汇
+- 选择对中文学习者有用的词汇（动词、名词、形容词优先）
+- 提供中文拼音和越南语意思
+- 按句子顺序进行分析
+
+创新要求：
+- 必须是原创内容，不重复之前的故事
+- 情节要新颖有趣
+- 人物行为要符合生活常理
+- 加入一些小细节让故事更生动
 
 请严格按以下格式输出：
-1. [中文句子1]
-   [拼音句子1]
-2. [中文句子2]
-   [拼音句子2]
-3. [中文句子3]
-   [拼音句子3]
-[继续其他句子...]
-
+中文故事：[在这里写完整的中文故事]
 越南语翻译：[在这里写对应的完整越南语翻译]
+拼音版本：[在这里写完整的拼音，逐句对应中文故事]
 词汇分析：
 句子1：[第一个句子]
 重要词汇：
@@ -134,7 +135,7 @@ export default async function handler(req, res) {
 [继续其他句子...]
 
 不要包含其他解释、说明或格式标记。
-`;
+        `;
         
         // Configure generation parameters for longer content with enhanced randomness
         const generationConfig = {
@@ -174,12 +175,18 @@ export default async function handler(req, res) {
         let chineseStory = '';
         let vietnameseTranslation = '';
         let vocabularyAnalysis = [];
+        let pinyinStory = '';
         
         try {
             // Try to extract Chinese story, Vietnamese translation, and vocabulary
             const chineseMatch = cleanedText.match(/中文故事：(.*?)(?=越南语翻译：|$)/s);
             const vietnameseMatch = cleanedText.match(/越南语翻译：(.*?)(?=词汇分析：|$)/s);
             const vocabularyMatch = cleanedText.match(/词汇分析：(.*?)$/s);
+            const pinyinMatch = cleanedText.match(/拼音版本：(.*?)(?=词汇分析：|$)/s);
+            
+            if (pinyinMatch) {
+                pinyinStory = pinyinMatch[1].trim();
+            }
             
             if (chineseMatch && vietnameseMatch) {
                 chineseStory = chineseMatch[1].trim();
@@ -300,6 +307,7 @@ Yêu cầu:
         res.status(200).json({
             story: randomStoryData.chinese,
             translation: randomStoryData.vietnamese,
+            pinyin: pinyinStory,
             vocabulary: randomStoryData.vocabulary || [],
             method: 'fallback',
             temperature: parseFloat(req.query.temperature || 0.8),
