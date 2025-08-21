@@ -3,26 +3,26 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // Function to parse vocabulary analysis
 function parseVocabularyAnalysis(vocabText) {
     const vocabulary = [];
-    
+
     try {
         // Parse vocabulary items in format: 中文 (pinyin) - Vietnamese meaning
         const lines = vocabText.split('\n').filter(line => line.trim());
-        
+
         for (const line of lines) {
             const trimmedLine = line.trim();
             if (!trimmedLine || trimmedLine.length < 3) continue;
-            
+
             // Try different patterns to extract vocabulary
             let match;
-            
+
             // Pattern: 中文 (pinyin) - Vietnamese
             match = trimmedLine.match(/^[\d\.\-\*\s]*([^\(\)]+?)\s*\(([^)]+)\)\s*[-—]\s*(.+)$/);
-            
+
             if (!match) {
                 // Pattern: 中文(pinyin) - Vietnamese
                 match = trimmedLine.match(/^[\d\.\-\*\s]*([^\(\)]+?)\(([^)]+)\)\s*[-—]\s*(.+)$/);
             }
-            
+
             if (!match) {
                 // Pattern: 中文 - Vietnamese (pinyin)
                 match = trimmedLine.match(/^[\d\.\-\*\s]*([^\-—]+?)\s*[-—]\s*([^(]+?)\s*\(([^)]+)\)$/);
@@ -31,12 +31,12 @@ function parseVocabularyAnalysis(vocabText) {
                     match = [match[0], match[1], match[3], match[2]];
                 }
             }
-            
+
             if (match) {
                 const chinese = match[1].trim();
                 const pinyin = match[2].trim();
                 const vietnamese = match[3].trim();
-                
+
                 if (chinese && pinyin && vietnamese) {
                     vocabulary.push({
                         chinese,
@@ -49,7 +49,7 @@ function parseVocabularyAnalysis(vocabText) {
     } catch (error) {
         console.error('Error parsing vocabulary analysis:', error);
     }
-    
+
     return vocabulary;
 }
 
@@ -58,32 +58,32 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || 'AIzaSyA-R
 export default async function handler(req, res) {
     try {
         const { temperature = 0.8, prompt = "" } = req.query;
-        
+
         // Log request for debugging
         console.log(`Story generation request - Temperature: ${temperature}, Time: ${new Date().toISOString()}`);
-        
+
         // Get the model - using supported model
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        
+
         // Create prompt for Chinese story generation with Vietnamese translation
         const randomTopics = [
             // healing / motivation
-            "心灵治愈", "自我成长", "积极生活", "努力学习", "克服困难", "友情和支持", "梦想与希望", 
+            "心灵治愈", "自我成长", "积极生活", "努力学习", "克服困难", "友情和支持", "梦想与希望",
             // technology / CS / AI
             "人工智能", "计算机科学", "未来科技", "程序设计", "机器人", "互联网生活", "大数据", "虚拟现实", "手机应用",
             // keep some simple HSK daily-life topics (for balance)
             "学校生活", "家庭聚会", "健康生活", "读书经历", "旅行故事"
         ];
-        
+
         const randomCharacters = [
             "小明和小红", "张老师和学生们", "爷爷奶奶", "小李和朋友", "王医生",
             "刘妈妈和孩子", "陈先生", "林小姐", "老王和邻居", "小张同学"
         ];
-        
+
         const randomTopic = randomTopics[Math.floor(Math.random() * randomTopics.length)];
         const randomCharacter = randomCharacters[Math.floor(Math.random() * randomCharacters.length)];
         const randomNumber = Math.floor(Math.random() * 1000);
-        
+
         const storyPrompt = prompt || `
 请创作一个关于"${randomTopic}"的全新中文故事（30-50个句子，大约500-800字），主角是"${randomCharacter}"，并提供完整的越南语翻译和词汇分析。
 
@@ -136,7 +136,7 @@ export default async function handler(req, res) {
 
 不要包含其他解释、说明或格式标记。
         `;
-        
+
         // Configure generation parameters for longer content with enhanced randomness
         const generationConfig = {
             temperature: Math.max(0.1, Math.min(1.0, parseFloat(temperature))),
@@ -146,22 +146,22 @@ export default async function handler(req, res) {
             // Add some randomness to prevent caching
             candidateCount: 1,
         };
-        
+
         // Generate content with unique session identifier
         const sessionId = Date.now() + Math.random();
         const result = await model.generateContent({
-            contents: [{ 
-                role: "user", 
-                parts: [{ 
-                    text: storyPrompt + `\n\n[会话ID: ${sessionId}]` 
-                }] 
+            contents: [{
+                role: "user",
+                parts: [{
+                    text: storyPrompt + `\n\n[会话ID: ${sessionId}]`
+                }]
             }],
             generationConfig,
         });
-        
+
         const response = await result.response;
         const generatedText = response.text();
-        
+
         // Clean up the response
         const cleanedText = generatedText
             .replace(/```.*?```/gs, '') // Remove code blocks
@@ -170,28 +170,28 @@ export default async function handler(req, res) {
             .replace(/#+\s*/g, '') // Remove headers
             .replace(/\[会话ID:.*?\]/g, '') // Remove session ID
             .trim();
-        
+
         // Parse Chinese story, Vietnamese translation, and vocabulary analysis
         let chineseStory = '';
         let vietnameseTranslation = '';
         let vocabularyAnalysis = [];
         let pinyinStory = '';
-        
+
         try {
             // Try to extract Chinese story, Vietnamese translation, and vocabulary
             const chineseMatch = cleanedText.match(/中文故事：(.*?)(?=越南语翻译：|$)/s);
             const vietnameseMatch = cleanedText.match(/越南语翻译：(.*?)(?=词汇分析：|$)/s);
             const vocabularyMatch = cleanedText.match(/词汇分析：(.*?)$/s);
             const pinyinMatch = cleanedText.match(/拼音版本：(.*?)(?=词汇分析：|$)/s);
-            
+
             if (pinyinMatch) {
                 pinyinStory = pinyinMatch[1].trim();
             }
-            
+
             if (chineseMatch && vietnameseMatch) {
                 chineseStory = chineseMatch[1].trim();
                 vietnameseTranslation = vietnameseMatch[1].trim();
-                
+
                 // Parse vocabulary analysis if available
                 if (vocabularyMatch) {
                     const vocabText = vocabularyMatch[1].trim();
@@ -204,7 +204,7 @@ export default async function handler(req, res) {
                 let foundVietnamese = false;
                 let foundVocabulary = false;
                 let currentSection = '';
-                
+
                 for (const line of lines) {
                     if (line.includes('中文故事：') || line.includes('故事：')) {
                         currentSection = 'chinese';
@@ -223,7 +223,7 @@ export default async function handler(req, res) {
                         vietnameseTranslation += ' ' + line.trim();
                     }
                 }
-                
+
                 // If still no luck, use the whole text as Chinese story
                 if (!chineseStory && cleanedText.length > 0) {
                     chineseStory = cleanedText.split('越南语翻译：')[0].trim();
@@ -233,7 +233,7 @@ export default async function handler(req, res) {
             console.error('Error parsing generated content:', parseError);
             chineseStory = cleanedText;
         }
-        
+
         // If Vietnamese translation is empty or too short, generate it separately
         if (!vietnameseTranslation || vietnameseTranslation.length < 10) {
             try {
@@ -250,7 +250,7 @@ Yêu cầu:
                     contents: [{ role: "user", parts: [{ text: translationPrompt }] }],
                     generationConfig: { temperature: 0.3, maxOutputTokens: 500 },
                 });
-                
+
                 const translationResponse = await translationResult.response;
                 vietnameseTranslation = translationResponse.text()
                     .replace(/```.*?```/gs, '')
@@ -264,18 +264,19 @@ Yêu cầu:
                 vietnameseTranslation = 'Không thể tạo bản dịch tiếng Việt.';
             }
         }
-        
+
         // Validate story length and content (adjusted for longer stories)
         if (!chineseStory || chineseStory.length < 200) {
             throw new Error('Generated story is too short or empty');
         }
-        
+
         // Log successful generation
         console.log(`Story generated successfully - Length: ${chineseStory.length} chars, Topic: ${randomTopic}, Character: ${randomCharacter}`);
-        
+
         res.status(200).json({
             story: chineseStory,
             translation: vietnameseTranslation,
+            pinyin: pinyinStory,
             vocabulary: vocabularyAnalysis,
             method: 'google_ai',
             temperature: parseFloat(temperature),
@@ -287,10 +288,10 @@ Yêu cầu:
                 timestamp: new Date().toISOString()
             }
         });
-        
+
     } catch (error) {
         console.error('Google AI Studio error:', error);
-        
+
         // Longer fallback stories with Vietnamese translations (30+ sentences each)
         const fallbackStories = [
             {
@@ -298,12 +299,12 @@ Yêu cầu:
                 vietnamese: "BUG"
             }
         ];
-        
+
         const randomStoryData = fallbackStories[Math.floor(Math.random() * fallbackStories.length)];
-        
+
         // Log fallback usage
         console.log(`Using fallback story due to API error: ${error.message}`);
-        
+
         res.status(200).json({
             story: randomStoryData.chinese,
             translation: randomStoryData.vietnamese,
