@@ -16,16 +16,16 @@ function parseVocabularyAnalysis(vocabText) {
             let match;
 
             // Pattern: 中文 (pinyin) - Vietnamese
-            match = trimmedLine.match(/^[\d\.\-\*\s]*([^\(\)]+?)\s*\(([^)]+)\)\s*[-—]\s*(.+)$/);
+            match = trimmedLine.match(/^[\d\.\-\*\s]*([^\(\)]+?)\s*\(([^)]+)\)\s*[-–—]\s*(.+)$/);
 
             if (!match) {
                 // Pattern: 中文(pinyin) - Vietnamese
-                match = trimmedLine.match(/^[\d\.\-\*\s]*([^\(\)]+?)\(([^)]+)\)\s*[-—]\s*(.+)$/);
+                match = trimmedLine.match(/^[\d\.\-\*\s]*([^\(\)]+?)\(([^)]+)\)\s*[-–—]\s*(.+)$/);
             }
 
             if (!match) {
                 // Pattern: 中文 - Vietnamese (pinyin)
-                match = trimmedLine.match(/^[\d\.\-\*\s]*([^\-—]+?)\s*[-—]\s*([^(]+?)\s*\(([^)]+)\)$/);
+                match = trimmedLine.match(/^[\d\.\-\*\s]*([^\-–—]+?)\s*[-–—]\s*([^(]+?)\s*\(([^)]+)\)$/);
                 if (match) {
                     // Reorder to maintain consistency
                     match = [match[0], match[1], match[3], match[2]];
@@ -51,6 +51,61 @@ function parseVocabularyAnalysis(vocabText) {
     }
 
     return vocabulary;
+}
+
+// Function to process pinyin to match sentence structure
+function processPinyinBySentence(chineseStory, pinyinStory) {
+    try {
+        // Split Chinese story into sentences
+        const chineseSentences = chineseStory.split(/[。！？]/).filter(s => s.trim().length > 0);
+        
+        // Clean and normalize pinyin text
+        let cleanPinyin = pinyinStory
+            .replace(/\s+/g, ' ')  // Normalize spaces
+            .replace(/[。！？]/g, '|')  // Replace Chinese punctuation with separator
+            .replace(/\./g, '|')  // Replace periods with separator
+            .trim();
+
+        // Try to split pinyin by sentence separators
+        let pinyinSentences = cleanPinyin.split('|').filter(s => s.trim().length > 0);
+        
+        // If we don't have enough pinyin sentences, try alternative splitting
+        if (pinyinSentences.length < chineseSentences.length) {
+            // Try splitting by capital letters (sentence starts)
+            pinyinSentences = cleanPinyin.split(/(?=[A-Z])/).filter(s => s.trim().length > 0);
+        }
+
+        // If still not enough, estimate by word count
+        if (pinyinSentences.length < chineseSentences.length) {
+            const words = cleanPinyin.split(/\s+/);
+            const wordsPerSentence = Math.ceil(words.length / chineseSentences.length);
+            
+            pinyinSentences = [];
+            for (let i = 0; i < chineseSentences.length; i++) {
+                const start = i * wordsPerSentence;
+                const end = Math.min((i + 1) * wordsPerSentence, words.length);
+                const sentenceWords = words.slice(start, end);
+                if (sentenceWords.length > 0) {
+                    pinyinSentences.push(sentenceWords.join(' '));
+                }
+            }
+        }
+
+        // Ensure we have the same number of sentences, pad with empty if needed
+        while (pinyinSentences.length < chineseSentences.length) {
+            pinyinSentences.push('');
+        }
+
+        // Trim and format each pinyin sentence
+        pinyinSentences = pinyinSentences.map(sentence => sentence.trim());
+
+        // Join back with sentence separators
+        return pinyinSentences.join('。');
+
+    } catch (error) {
+        console.error('Error processing pinyin by sentence:', error);
+        return pinyinStory; // Return original if processing fails
+    }
 }
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || 'AIzaSyA-RoIFHiugICkurNANegXrXfI48ZhzRsY');
@@ -192,6 +247,11 @@ export default async function handler(req, res) {
                 chineseStory = chineseMatch[1].trim();
                 vietnameseTranslation = vietnameseMatch[1].trim();
 
+                // Process pinyin to match sentence structure
+                if (pinyinStory) {
+                    pinyinStory = processPinyinBySentence(chineseStory, pinyinStory);
+                }
+
                 // Parse vocabulary analysis if available
                 if (vocabularyMatch) {
                     const vocabText = vocabularyMatch[1].trim();
@@ -214,6 +274,9 @@ export default async function handler(req, res) {
                         currentSection = 'vietnamese';
                         vietnameseTranslation = line.replace(/^(越南语翻译：|翻译：|越南语：)/, '').trim();
                         foundVietnamese = true;
+                    } else if (line.includes('拼音版本：')) {
+                        currentSection = 'pinyin';
+                        pinyinStory = line.replace(/^拼音版本：/, '').trim();
                     } else if (line.includes('词汇分析：')) {
                         currentSection = 'vocabulary';
                         foundVocabulary = true;
@@ -221,7 +284,14 @@ export default async function handler(req, res) {
                         chineseStory += ' ' + line.trim();
                     } else if (currentSection === 'vietnamese' && !foundVocabulary) {
                         vietnameseTranslation += ' ' + line.trim();
+                    } else if (currentSection === 'pinyin' && !foundVocabulary) {
+                        pinyinStory += ' ' + line.trim();
                     }
+                }
+
+                // Process pinyin after extraction
+                if (pinyinStory && chineseStory) {
+                    pinyinStory = processPinyinBySentence(chineseStory, pinyinStory);
                 }
 
                 // If still no luck, use the whole text as Chinese story

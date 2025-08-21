@@ -962,7 +962,21 @@ export default function Home() {
                             </span>
                         )}
                     </div>
-                    {translation}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                        {translation
+                            .split(/[.!?。！？]/)
+                            .filter(s => s.trim().length > 0)
+                            .map((sentence, index) => (
+                                <div key={index} style={{
+                                    backgroundColor: currentSentenceIndex === index ? "#fff3cd" : "transparent",
+                                    padding: "8px",
+                                    borderRadius: "4px",
+                                    border: currentSentenceIndex === index ? "2px solid #ffc107" : "none"
+                                }}>
+                                    <strong>{index + 1}.</strong> {sentence.trim()}
+                                </div>
+                            ))}
+                    </div>
                 </div>
             )}
 
